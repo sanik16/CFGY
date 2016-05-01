@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -27,15 +28,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
 import net.proteanit.sql.DbUtils;
+import redis.clients.jedis.Jedis;
 import RUN.Project;
-
-import javax.swing.JScrollPane;
 
 public class MainScreen extends JFrame {
 
@@ -73,11 +74,16 @@ public class MainScreen extends JFrame {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	Connection conn = null;    //inicializacia pripojenia na sql
+	Jedis jedis = null;
 	private JPasswordField passwordField;
 	private JTable tableHistory_shop;
 	private JTable tableHistory_train;
 	private JTable tableHistory_perm;
-	private JTable tableShopping_card;
+	
+	public int cenaSpolu = 0;
+	public int priemerPolozky = 0;
+	public int pocet = 0;
+	
 	
 	public void refreshTable(){									////funkcia na refresh tabulky.....
 		try{
@@ -99,7 +105,12 @@ public class MainScreen extends JFrame {
 	public MainScreen() throws Exception {
 		
 		getContentPane().setLayout(new CardLayout(0, 0));
-		conn = Project.getConnection();  						//pripojenie na MySQL.......
+		conn = Project.getConnection();			//pripojenie na MySQL.......
+		jedis = Project.getJedis();
+		String cacheKey = "ShoppingCard";			//meno na redis...
+		String cacheCena = "CenaTovaru";
+		String cachePocet = "PocetKS";
+		
 		
 		JPanel panelHome = new JPanel();
 		getContentPane().add(panelHome, "name_94569231393008");
@@ -987,11 +998,22 @@ public class MainScreen extends JFrame {
 		panelShoppingCard.add(btnOrder);
 		
 		JScrollPane scrollShoppingCard = new JScrollPane();
-		scrollShoppingCard.setBounds(25, 71, 549, 311);
+		scrollShoppingCard.setBounds(29, 80, 519, 290);
 		panelShoppingCard.add(scrollShoppingCard);
 		
-		tableShopping_card = new JTable();
-		scrollShoppingCard.setViewportView(tableShopping_card);
+		JTextArea textShoppingCard = new JTextArea();
+		textShoppingCard.setFont(new Font("Monospaced", Font.BOLD, 15));
+		scrollShoppingCard.setViewportView(textShoppingCard);
+		
+		JButton btnZobrazKS = new JButton("PocetKS");
+		btnZobrazKS.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 17));
+		btnZobrazKS.setBounds(302, 397, 117, 38);
+		panelShoppingCard.add(btnZobrazKS);
+		
+		JButton btnCenaTovaru = new JButton("Celkova cena");
+		btnCenaTovaru.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 17));
+		btnCenaTovaru.setBounds(153, 397, 137, 38);
+		panelShoppingCard.add(btnCenaTovaru);
 		
 		JPanel panelHistory_train = new JPanel();
 		getContentPane().add(panelHistory_train, "name_11603030144481");
@@ -2505,6 +2527,156 @@ public class MainScreen extends JFrame {
 
 			}
 		});
+		
+		btnShoppingCard1.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {			
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				panelRegister.setVisible(false);
+				panelShirts.setVisible(false);
+				panelShorts.setVisible(false);
+				panelShoes.setVisible(false);
+				panelAbout.setVisible(false);
+				panelHome.setVisible(false);
+				panelProfil.setVisible(false);
+				panelPermanentky.setVisible(false);
+				panelTrainings.setVisible(false);
+				panelShoppingCard.setVisible(true);
+				panelUpdate.setVisible(false);
+				panelCheck.setVisible(false);
+				panelOpenGym.setVisible(false);
+				panelCrossfit.setVisible(false);
+				panelMesacna.setVisible(false);
+				panelLifting.setVisible(false);
+				panelBegginers.setVisible(false);
+				panelHistory_shop.setVisible(false);
+				panelHistory_train.setVisible(false);
+				panelVstupova.setVisible(false);
+				panelTyzdnova.setVisible(false);
+				panelHistory_perma.setVisible(false);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+			}
+		});
+		
+		btnShoppingCard2.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {			
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				panelRegister.setVisible(false);
+				panelShirts.setVisible(false);
+				panelShorts.setVisible(false);
+				panelShoes.setVisible(false);
+				panelAbout.setVisible(false);
+				panelHome.setVisible(false);
+				panelProfil.setVisible(false);
+				panelPermanentky.setVisible(false);
+				panelTrainings.setVisible(false);
+				panelShoppingCard.setVisible(true);
+				panelUpdate.setVisible(false);
+				panelCheck.setVisible(false);
+				panelOpenGym.setVisible(false);
+				panelCrossfit.setVisible(false);
+				panelMesacna.setVisible(false);
+				panelLifting.setVisible(false);
+				panelBegginers.setVisible(false);
+				panelHistory_shop.setVisible(false);
+				panelHistory_train.setVisible(false);
+				panelVstupova.setVisible(false);
+				panelTyzdnova.setVisible(false);
+				panelHistory_perma.setVisible(false);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+			}
+		});
+		
+		btnShoppingCard3.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {			
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				panelRegister.setVisible(false);
+				panelShirts.setVisible(false);
+				panelShorts.setVisible(false);
+				panelShoes.setVisible(false);
+				panelAbout.setVisible(false);
+				panelHome.setVisible(false);
+				panelProfil.setVisible(false);
+				panelPermanentky.setVisible(false);
+				panelTrainings.setVisible(false);
+				panelShoppingCard.setVisible(true);
+				panelUpdate.setVisible(false);
+				panelCheck.setVisible(false);
+				panelOpenGym.setVisible(false);
+				panelCrossfit.setVisible(false);
+				panelMesacna.setVisible(false);
+				panelLifting.setVisible(false);
+				panelBegginers.setVisible(false);
+				panelHistory_shop.setVisible(false);
+				panelHistory_train.setVisible(false);
+				panelVstupova.setVisible(false);
+				panelTyzdnova.setVisible(false);
+				panelHistory_perma.setVisible(false);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+			}
+		});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Functions button
@@ -2799,45 +2971,175 @@ public class MainScreen extends JFrame {
 			}
 		});
 		
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		
 		btnShoes1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try{
-					String query = "insert into polozka (id_objednavka, id_produkt, pocet_kusov) values (129, 1, 5) "; 
 					
-		    		java.sql.PreparedStatement pst = conn.prepareStatement(query); 
-		    		
-		    		pst.execute();
-		    		
-		    		
-		    		JOptionPane.showMessageDialog(panelShoes, "Pridane do kosika!");
-			    	pst.close();
-			    	
-			    	
-		    		
-				}catch(Exception ex){
-					ex.printStackTrace();
-				}
+				jedis.lpush(cacheKey, "Nike shoes train");
+				jedis.lpush(cacheCena, "62");
+				jedis.incr(cachePocet);
+				cenaSpolu += 62;
+				pocet++;
+				//System.out.println("Cena je: " + cenaSpolu);
+			}
+		});
+		
+		btnShoes2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shoes wear");
+				jedis.lpush(cacheCena, "31");
+				jedis.incr(cachePocet);
+				cenaSpolu += 31;
+				pocet++;
+				
+			}
+		});
+		
+		btnShoes3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shoes sport");
+				jedis.lpush(cacheCena, "99");
+				jedis.incr(cachePocet);
+				cenaSpolu += 99;
+				pocet++;
+				
+			}
+		});
+		
+		btnShirt1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shirt sport");
+				jedis.lpush(cacheCena, "78");
+				jedis.incr(cachePocet);
+				cenaSpolu += 78;
+				pocet++;
+			}
+		});
+		
+		btnShirt2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shirt train");
+				jedis.lpush(cacheCena, "50");
+				jedis.incr(cachePocet);
+				cenaSpolu += 50;
+				pocet++;
+			}
+		});
+		
+		btnShirt3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shirt swear");
+				jedis.lpush(cacheCena, "49");
+				jedis.incr(cachePocet);
+				cenaSpolu += 49;
+				pocet++;
+			}
+		});
+		
+		btnShorts1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shorts sport");
+				jedis.lpush(cacheCena, "41");
+				jedis.incr(cachePocet);
+				cenaSpolu += 41;
+				pocet++;
+			}
+		});
+		
+		btnShorts2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shorts wear");
+				jedis.lpush(cacheCena, "43");
+				jedis.incr(cachePocet);
+				cenaSpolu += 43;
+				pocet++;
+			}
+		});
+		
+		btnShorts3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.lpush(cacheKey, "Nike shorts train");
+				jedis.lpush(cacheCena, "44");
+				jedis.incr(cachePocet);
+				cenaSpolu += 44;
+				pocet++;
 			}
 		});
 		
 		mntmShoppingCard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			
+				
+				textShoppingCard.setText("V kosiku mate:\n" + jedis.lrange(cacheKey, 0, -1).toString()); 
+				
+			}
+		});
+		
+		btnShoppingCard2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			
+				
+				textShoppingCard.setText("V kosiku mate:\n" + jedis.lrange(cacheKey, 0, -1).toString()); 
+				
+			}
+		});
+		
+		btnOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				try{
-					String query = "SELECT * FROM objednavka where id_user = '"+lblIdUser.getText()+"' having extract(year from datum_objednavky) = 2015 and extract(month from datum_objednavky) = 1 "; 
+					String query = "insert objednavka (id_user, datum_objednavky) values ('"+lblIdUser.getText()+"', '2016-05-05')"; 
 					
 		    		java.sql.PreparedStatement pst = conn.prepareStatement(query); 
-		    		ResultSet rs = pst.executeQuery();
-		    		
-		    		tableShopping_card.setModel(DbUtils.resultSetToTableModel(rs));
-					
-		    		rs.close();
-			    	pst.close();
+		    				    		
+		    		pst.execute();
+		    		pst.close();
+		    		JOptionPane.showMessageDialog(panelShoppingCard, "Objednava uspesna!!!");
 		    		
 				}catch(Exception ex){
 					ex.printStackTrace();
 				}
+				
+				jedis.del(cacheKey);
+				jedis.del(cacheCena);
+				jedis.del(cachePocet);
+				cenaSpolu = 0;
+				pocet = 0;
 			}
 		});
+		
+		btnZobrazKS.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				textShoppingCard.setText("Pocet poloziek v kosiku je: " + jedis.get(cachePocet).toString()); /// + jedis.zcard(cacheKey).toString());
+
+			}
+		});
+		
+		btnCenaTovaru.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+				jedis.sort(cacheCena);
+				priemerPolozky = cenaSpolu / pocet;
+				textShoppingCard.setText("Cena vsetkych poloziek v kosiku je: " + cenaSpolu + " Eur\nPriemerna cena polozky v nakupnom kosiku je: " + priemerPolozky + " Eur"); 
+				//System.out.println("cena je:" + cenaSpolu);
+			}
+
+			
+
+		});
+		
+		
+		
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 		
 		btnUkaz_historiu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
